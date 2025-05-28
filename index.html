@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit Circle Learning Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .game-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            background: #e0e0e0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .tab.active {
+            background: #007bff;
+            color: white;
+        }
+        
+        .part {
+            display: none;
+        }
+        
+        .part.active {
+            display: block;
+        }
+        
+        .unit-circle {
+            width: 400px;
+            height: 400px;
+            margin: 20px auto;
+            position: relative;
+        }
+        
+        .circle-point {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #007bff;
+            border-radius: 50%;
+            cursor: pointer;
+            transform: translate(-6px, -6px);
+        }
+        
+        .circle-point.clickable:hover {
+            background: #0056b3;
+            transform: translate(-6px, -6px) scale(1.2);
+        }
+        
+        .circle-point.selected {
+            background: #ffc107;
+            border: 2px solid #e0a800;
+        }
+        
+        .angle-label {
+            position: absolute;
+            font-size: 12px;
+            color: #333;
+            white-space: nowrap;
+        }
+        
+        .answers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .answer-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        
+        .answer-item h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .feedback {
+            margin-top: 5px;
+            font-weight: bold;
+        }
+        
+        .correct { color: #28a745; }
+        .incorrect { color: #dc3545; }
+        
+        .score {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        
+        .reset-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        
+        .reset-btn:hover {
+            background: #218838;
+        }
+        
+        .matching-table {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .matching-item {
+            display: inline-block;
+            margin: 5px;
+            padding: 8px 12px;
+            background: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .matching-item:hover {
+            background: #0056b3;
+        }
+        
+        .matching-item.selected {
+            background: #ffc107;
+            color: #000;
+        }
+        
+        .matching-item.matched {
+            background: #28a745;
+            cursor: default;
+        }
+        
+        .instructions {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #007bff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Unit Circle Learning Game</h1>
+    
+    <div class="tabs">
+        <button class="tab active" onclick="showPart(1)">Part 1: Unit Circle Values</button>
+        <button class="tab" onclick="showPart(2)">Part 2: Inverse Functions</button>
+    </div>
+    
+    <!-- Part 1: Unit Circle Values -->
+    <div id="part1" class="part active">
+        <div class="game-container">
+            <div class="instructions">
+                <strong>Instructions:</strong> Select the correct sin, cos, and tan values for each angle shown on the unit circle. You get two attempts per question.
+            </div>
+            
+            <svg class="unit-circle" viewBox="-220 -220 440 440">
+                <!-- Circle -->
+                <circle cx="0" cy="0" r="200" fill="none" stroke="#333" stroke-width="2"/>
+                
+                <!-- Axes -->
+                <line x1="-220" y1="0" x2="220" y2="0" stroke="#666" stroke-width="1"/>
+                <line x1="0" y1="-220" x2="0" y2="220" stroke="#666" stroke-width="1"/>
+                
+                <!-- Angle points and labels will be added by JavaScript -->
+                <g id="angle-points"></g>
+            </svg>
+            
+            <div id="answers-container" class="answers-grid">
+                <!-- Answer dropdowns will be populated by JavaScript -->
+            </div>
+            
+            <div id="part1-score" class="score" style="display: none;"></div>
+            <button class="reset-btn" onclick="resetPart1()">Play Again</button>
+        </div>
+    </div>
+    
+    <!-- Part 2: Inverse Functions -->
+    <div id="part2" class="part">
+        <div class="game-container">
+            <div class="instructions">
+                <strong>Instructions:</strong> Click on an inverse function value below, then click on the corresponding angle point on the unit circle. Click on the blue points on the circle.
+            </div>
+            
+            <div class="matching-table">
+                <h3>Match these inverse function values:</h3>
+                <div id="inverse-values">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+            
+            <svg class="unit-circle" viewBox="-220 -220 440 440">
+                <!-- Circle -->
+                <circle cx="0" cy="0" r="200" fill="none" stroke="#333" stroke-width="2"/>
+                
+                <!-- Axes -->
+                <line x1="-220" y1="0" x2="220" y2="0" stroke="#666" stroke-width="1"/>
+                <line x1="0" y1="-220" x2="0" y2="220" stroke="#666" stroke-width="1"/>
+                
+                <!-- Clickable angle points -->
+                <g id="part2-angle-points"></g>
+            </svg>
+            
+            <div id="part2-score" class="score" style="display: none;"></div>
+            <button class="reset-btn" onclick="resetPart2()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Key angles in degrees and their radian equivalents
+        const keyAngles = [
+            { deg: 0, rad: 0, label: '0° (0)' },
+            { deg: 30, rad: Math.PI/6, label: '30° (π/6)' },
+            { deg: 45, rad: Math.PI/4, label: '45° (π/4)' },
+            { deg: 60, rad: Math.PI/3, label: '60° (π/3)' },
+            { deg: 90, rad: Math.PI/2, label: '90° (π/2)' },
+            { deg: -30, rad: -Math.PI/6, label: '-30° (-π/6)' },
+            { deg: -45, rad: -Math.PI/4, label: '-45° (-π/4)' },
+            { deg: -60, rad: -Math.PI/3, label: '-60° (-π/3)' },
+            { deg: -90, rad: -Math.PI/2, label: '-90° (-π/2)' }
+        ];
+        
+        // Dropdown options
+        const dropdownOptions = [
+            { value: '', text: 'Select...' },
+            { value: '0', text: '0' },
+            { value: '0.5', text: '1/2' },
+            { value: '0.707', text: '√2/2' },
+            { value: '0.866', text: '√3/2' },
+            { value: '1', text: '1' },
+            { value: '-0.5', text: '-1/2' },
+            { value: '-0.707', text: '-√2/2' },
+            { value: '-0.866', text: '-√3/2' },
+            { value: '-1', text: '-1' },
+            { value: '1.732', text: '√3' },
+            { value: '-1.732', text: '-√3' },
+            { value: 'undefined', text: 'Undefined' }
+        ];
+        
+        // Inverse function values for Part 2
+        const inverseValues = [
+            { func: 'arcsin(1/2)', answer: 30, display: '30° (π/6 rad)' },
+            { func: 'arcsin(√2/2)', answer: 45, display: '45° (π/4 rad)' },
+            { func: 'arcsin(√3/2)', answer: 60, display: '60° (π/3 rad)' },
+            { func: 'arcsin(1)', answer: 90, display: '90° (π/2 rad)' },
+            { func: 'arccos(√3/2)', answer: 30, display: '30° (π/6 rad)' },
+            { func: 'arccos(√2/2)', answer: 45, display: '45° (π/4 rad)' },
+            { func: 'arccos(1/2)', answer: 60, display: '60° (π/3 rad)' },
+            { func: 'arccos(0)', answer: 90, display: '90° (π/2 rad)' }
+        ];
+        
+        let part1Attempts = {};
+        let part1Score = 0;
+        let part1Total = 0;
+        let selectedInverseValue = null;
+        let part2Matches = {};
+        let part2Score = 0;
+        let part2Total = inverseValues.length;
+        
+        function showPart(partNum) {
+            document.querySelectorAll('.part').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            
+            document.getElementById(`part${partNum}`).classList.add('active');
+            document.querySelectorAll('.tab')[partNum - 1].classList.add('active');
+        }
+        
+        function getTrigValues(deg) {
+            const rad = deg * Math.PI / 180;
+            const sin = Math.round(Math.sin(rad) * 1000) / 1000;
+            const cos = Math.round(Math.cos(rad) * 1000) / 1000;
+            let tan;
+            
+            if (deg === 90 || deg === -90) {
+                tan = 'undefined';
+            } else {
+                tan = Math.round(Math.tan(rad) * 1000) / 1000;
+            }
+            
+            return { sin, cos, tan };
+        }
+        
+        function setupPart1() {
+            const pointsGroup = document.getElementById('angle-points');
+            const answersContainer = document.getElementById('answers-container');
+            
+            pointsGroup.innerHTML = '';
+            answersContainer.innerHTML = '';
+            
+            keyAngles.forEach((angle, index) => {
+                // Calculate position on circle
+                const rad = angle.rad;
+                const x = 200 * Math.cos(rad);
+                const y = -200 * Math.sin(rad); // Negative because SVG y increases downward
+                
+                // Add point
+                const point = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                point.setAttribute('cx', x);
+                point.setAttribute('cy', y);
+                point.setAttribute('r', 6);
+                point.setAttribute('fill', '#007bff');
+                pointsGroup.appendChild(point);
+                
+                // Add label
+                const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                label.setAttribute('x', x + (x > 0 ? 15 : -15));
+                label.setAttribute('y', y + (y > 0 ? 15 : -5));
+                label.setAttribute('text-anchor', x > 0 ? 'start' : 'end');
+                label.setAttribute('font-size', '12');
+                label.setAttribute('fill', '#333');
+                label.textContent = angle.label;
+                pointsGroup.appendChild(label);
+                
+                // Create answer section
+                const answerDiv = document.createElement('div');
+                answerDiv.className = 'answer-item';
+                answerDiv.innerHTML = `
+                    <h4>${angle.label}</h4>
+                    <div>
+                        <label>sin: </label>
+                        <select id="sin-${index}" onchange="checkAnswer(${index}, 'sin')">
+                            ${dropdownOptions.map(opt => `<option value="${opt.value}">${opt.text}</option>`).join('')}
+                        </select>
+                        <div id="sin-${index}-feedback" class="feedback"></div>
+                    </div>
+                    <div>
+                        <label>cos: </label>
+                        <select id="cos-${index}" onchange="checkAnswer(${index}, 'cos')">
+                            ${dropdownOptions.map(opt => `<option value="${opt.value}">${opt.text}</option>`).join('')}
+                        </select>
+                        <div id="cos-${index}-feedback" class="feedback"></div>
+                    </div>
+                    <div>
+                        <label>tan: </label>
+                        <select id="tan-${index}" onchange="checkAnswer(${index}, 'tan')">
+                            ${dropdownOptions.map(opt => `<option value="${opt.value}">${opt.text}</option>`).join('')}
+                        </select>
+                        <div id="tan-${index}-feedback" class="feedback"></div>
+                    </div>
+                `;
+                answersContainer.appendChild(answerDiv);
+            });
+            
+            part1Total = keyAngles.length * 3; // 3 functions per angle
+            part1Attempts = {};
+            part1Score = 0;
+        }
+        
+        function checkAnswer(angleIndex, func) {
+            const select = document.getElementById(`${func}-${angleIndex}`);
+            const feedback = document.getElementById(`${func}-${angleIndex}-feedback`);
+            const key = `${angleIndex}-${func}`;
+            
+            if (!part1Attempts[key]) {
+                part1Attempts[key] = 0;
+            }
+            
+            const selectedValue = select.value;
+            const correctValues = getTrigValues(keyAngles[angleIndex].deg);
+            const correctValue = correctValues[func];
+            
+            let isCorrect = false;
+            if (correctValue === 'undefined') {
+                isCorrect = selectedValue === 'undefined';
+            } else {
+                isCorrect = Math.abs(parseFloat(selectedValue) - correctValue) < 0.01;
+            }
+            
+            part1Attempts[key]++;
+            
+            if (isCorrect) {
+                feedback.innerHTML = '✓ Correct!';
+                feedback.className = 'feedback correct';
+                select.disabled = true;
+                if (part1Attempts[key] === 1) {
+                    part1Score++;
+                }
+            } else {
+                const selectedText = dropdownOptions.find(opt => opt.value === selectedValue)?.text || selectedValue;
+                if (part1Attempts[key] === 1) {
+                    feedback.innerHTML = `✗ "${selectedText}" is incorrect. Try again!`;
+                    feedback.className = 'feedback incorrect';
+                } else {
+                    feedback.innerHTML = `✗ You selected "${selectedText}". Correct answer: ${getDisplayValue(correctValue)}`;
+                    feedback.className = 'feedback incorrect';
+                    select.disabled = true;
+                }
+            }
+            
+            checkPart1Complete();
+        }
+        
+        function getDisplayValue(value) {
+            if (value === 'undefined') return 'Undefined';
+            const option = dropdownOptions.find(opt => Math.abs(parseFloat(opt.value) - value) < 0.01);
+            return option ? option.text : value.toString();
+        }
+        
+        function checkPart1Complete() {
+            const allSelects = document.querySelectorAll('#part1 select');
+            const allDisabled = Array.from(allSelects).every(select => select.disabled);
+            
+            if (allDisabled) {
+                const scorePercent = Math.round((part1Score / part1Total) * 100);
+                document.getElementById('part1-score').innerHTML = `Your Score: ${part1Score}/${part1Total} (${scorePercent}%)`;
+                document.getElementById('part1-score').style.display = 'block';
+            }
+        }
+        
+        function resetPart1() {
+            document.getElementById('part1-score').style.display = 'none';
+            setupPart1();
+        }
+        
+        function setupPart2() {
+            const valuesContainer = document.getElementById('inverse-values');
+            const pointsGroup = document.getElementById('part2-angle-points');
+            
+            valuesContainer.innerHTML = '';
+            pointsGroup.innerHTML = '';
+            
+            // Add inverse function values
+            inverseValues.forEach((item, index) => {
+                const valueDiv = document.createElement('div');
+                valueDiv.className = 'matching-item';
+                valueDiv.textContent = item.func;
+                valueDiv.onclick = () => selectInverseValue(index);
+                valueDiv.id = `inverse-${index}`;
+                valuesContainer.appendChild(valueDiv);
+            });
+            
+            // Add clickable points for positive angles only (principal values)
+            const positiveAngles = keyAngles.filter(angle => angle.deg >= 0);
+            positiveAngles.forEach((angle, index) => {
+                const rad = angle.rad;
+                const x = 200 * Math.cos(rad);
+                const y = -200 * Math.sin(rad);
+                
+                // Add clickable point
+                const point = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                point.setAttribute('cx', x);
+                point.setAttribute('cy', y);
+                point.setAttribute('r', 8);
+                point.setAttribute('fill', '#007bff');
+                point.setAttribute('class', 'circle-point clickable');
+                point.onclick = () => selectAngle(angle.deg);
+                pointsGroup.appendChild(point);
+                
+                // Add label
+                const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                label.setAttribute('x', x + (x > 0 ? 15 : -15));
+                label.setAttribute('y', y + (y > 0 ? 15 : -5));
+                label.setAttribute('text-anchor', x > 0 ? 'start' : 'end');
+                label.setAttribute('font-size', '12');
+                label.setAttribute('fill', '#333');
+                label.textContent = angle.label;
+                pointsGroup.appendChild(label);
+            });
+            
+            selectedInverseValue = null;
+            part2Matches = {};
+            part2Score = 0;
+        }
+        
+        function selectInverseValue(index) {
+            if (document.getElementById(`inverse-${index}`).classList.contains('matched')) {
+                return;
+            }
+            
+            // Clear previous selection
+            document.querySelectorAll('.matching-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            selectedInverseValue = index;
+            document.getElementById(`inverse-${index}`).classList.add('selected');
+        }
+        
+        function selectAngle(degree) {
+            if (selectedInverseValue === null) {
+                alert('Please select an inverse function value first!');
+                return;
+            }
+            
+            const correctAnswer = inverseValues[selectedInverseValue].answer;
+            const selectedItem = document.getElementById(`inverse-${selectedInverseValue}`);
+            
+            if (degree === correctAnswer) {
+                selectedItem.classList.remove('selected');
+                selectedItem.classList.add('matched');
+                selectedItem.innerHTML = `${inverseValues[selectedInverseValue].func} = ${inverseValues[selectedInverseValue].display} ✓`;
+                part2Score++;
+            } else {
+                selectedItem.classList.remove('selected');
+                selectedItem.classList.add('matched');
+                selectedItem.innerHTML = `${inverseValues[selectedInverseValue].func} = ${inverseValues[selectedInverseValue].display} ✗`;
+            }
+            
+            selectedInverseValue = null;
+            
+            checkPart2Complete();
+        }
+        
+        function checkPart2Complete() {
+            const matchedItems = document.querySelectorAll('.matching-item.matched').length;
+            if (matchedItems === part2Total) {
+                const scorePercent = Math.round((part2Score / part2Total) * 100);
+                document.getElementById('part2-score').innerHTML = `Your Score: ${part2Score}/${part2Total} (${scorePercent}%)`;
+                document.getElementById('part2-score').style.display = 'block';
+            }
+        }
+        
+        function resetPart2() {
+            document.getElementById('part2-score').style.display = 'none';
+            setupPart2();
+        }
+        
+        // Initialize the game
+        setupPart1();
+        setupPart2();
+    </script>
+</body>
+</html>
