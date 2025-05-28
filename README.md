@@ -2,9 +2,6 @@
 
 An interactive educational game for learning trigonometric values on the unit circle.
 
-## Play Online
-Once deployed, visit: https://YOUR-USERNAME.github.io/unit-circle-study-game/
-
 ## Features
 - Practice sin, cos, and tan values for key angles
 - Interactive inverse function matching
