@@ -110,6 +110,16 @@
             font-size: 14px;
         }
         
+        select.incorrect {
+            border: 2px solid #dc3545;
+            background-color: #f8d7da;
+        }
+        
+        select.correct {
+            border: 2px solid #28a745;
+            background-color: #d4edda;
+        }
+        
         .feedback {
             margin-top: 5px;
             font-weight: bold;
@@ -417,6 +427,7 @@
             if (isCorrect) {
                 feedback.innerHTML = '✓ Correct!';
                 feedback.className = 'feedback correct';
+                select.className = 'correct';
                 select.disabled = true;
                 if (part1Attempts[key] === 1) {
                     part1Score++;
@@ -424,11 +435,13 @@
             } else {
                 const selectedText = dropdownOptions.find(opt => opt.value === selectedValue)?.text || selectedValue;
                 if (part1Attempts[key] === 1) {
-                    feedback.innerHTML = `✗ "${selectedText}" is incorrect. Try again!`;
+                    feedback.innerHTML = `✗ Try again!`;
                     feedback.className = 'feedback incorrect';
+                    select.className = 'incorrect';
                 } else {
-                    feedback.innerHTML = `✗ You selected "${selectedText}". Correct answer: ${getDisplayValue(correctValue)}`;
+                    feedback.innerHTML = `✗ Correct answer: ${getDisplayValue(correctValue)}`;
                     feedback.className = 'feedback incorrect';
+                    select.className = 'incorrect';
                     select.disabled = true;
                 }
             }
