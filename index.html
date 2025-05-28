@@ -186,6 +186,11 @@
             cursor: default;
         }
         
+        .matching-item.incorrect {
+            background: #dc3545;
+            cursor: default;
+        }
+        
         .instructions {
             background: #e7f3ff;
             padding: 15px;
@@ -522,7 +527,8 @@
         }
         
         function selectInverseValue(index) {
-            if (document.getElementById(`inverse-${index}`).classList.contains('matched')) {
+            if (document.getElementById(`inverse-${index}`).classList.contains('matched') || 
+                document.getElementById(`inverse-${index}`).classList.contains('incorrect')) {
                 return;
             }
             
@@ -551,8 +557,13 @@
                 part2Score++;
             } else {
                 selectedItem.classList.remove('selected');
-                selectedItem.classList.add('matched');
-                selectedItem.innerHTML = `${inverseValues[selectedInverseValue].func} = ${inverseValues[selectedInverseValue].display} ✗`;
+                selectedItem.classList.add('incorrect');
+                selectedItem.innerHTML = `${inverseValues[selectedInverseValue].func} ✗ Try again!`;
+                // Allow retry after a short delay
+                setTimeout(() => {
+                    selectedItem.classList.remove('incorrect');
+                    selectedItem.innerHTML = inverseValues[selectedInverseValue].func;
+                }, 2000);
             }
             
             selectedInverseValue = null;
